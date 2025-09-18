@@ -3,7 +3,6 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface Iuser extends Document {
   name: string;
   email: string;
-  password: string;
   image: string;
   instagram: string;
   facebook: string;
@@ -21,10 +20,6 @@ const schema: Schema<Iuser> = new Schema(
       type: String,
       required: true,
       unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
     },
     image: {
       type: String,
