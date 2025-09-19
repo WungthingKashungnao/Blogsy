@@ -78,7 +78,7 @@ export const updateUser = TryCatch(async (req: AuthenticatedRequest, res) => {
 // controller to update profile pic
 export const updateProfilePic = TryCatch(
   async (req: AuthenticatedRequest, res) => {
-    const file = req.file;
+    const file = req.file; //taking the file uploaded from multer - which is in buffer
 
     if (!file) {
       return res.status(400).json({
