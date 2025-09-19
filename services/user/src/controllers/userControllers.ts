@@ -2,6 +2,8 @@ import User from "../model/User.js";
 import jwt from "jsonwebtoken";
 import TryCatch from "../utils/TryCatch.js";
 import type { AuthenticatedRequest } from "../middleware/isAuth.js";
+import getBuffer from "../utils/dataUri.js";
+import { v2 as cloudinary } from "cloudinary";
 
 export const loginUser = TryCatch(async (req, res) => {
   const { email, name, image } = req.body;
@@ -72,3 +74,48 @@ export const updateUser = TryCatch(async (req: AuthenticatedRequest, res) => {
     user,
   });
 });
+
+// controller to update profile pic
+export const updateProfilePic = TryCatch(
+  async (req: AuthenticatedRequest, res) => {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({
+        message: "No file to upload",
+      });
+    }
+
+    const fileBuffer = getBuffer(file);
+
+    if (!fileBuffer || !fileBuffer.content) {
+      return res.status(400).json({
+        message: "Failed to generate buffer",
+      });
+    }
+
+    // uploading file to cloudinary in a folder calld blogs
+    const cloud = await cloudinary.uploader.upload(fileBuffer.content, {
+      folder: "blogs",
+    });
+
+    // uploading the file url from coludinary to mongodb
+    const user = await User.findByIdAndUpdate(
+      req.user?._id,
+      {
+        image: cloud.secure_url,
+      },
+      { new: true }
+    );
+
+    const token = jwt.sign({ user }, process.env.JWT_SEC as string, {
+      expiresIn: "5d",
+    });
+
+    return res.status(200).json({
+      message: "Successfully Updaetd User Profile Picture",
+      token,
+      user,
+    });
+  }
+);
