@@ -6,16 +6,16 @@ import { v2 as cloudinary } from "cloudinary"; //cloudinary package to store ima
 dotenv.config();
 
 const cloudName = process.env.Cloud_Name;
-const apiKey = process.env.Cloud_Api_Key;
-const apiSecret = process.env.Cloud_Api_Secret;
-if (!cloudName || !apiKey || !apiSecret) {
+const cloudApiKey = process.env.Cloud_Api_Key;
+const cloudApiSecret = process.env.Cloud_Api_Secret;
+if (!cloudName || !cloudApiKey || !cloudApiSecret) {
   throw new Error("Missing Cloudinary environment variables");
 }
 // cloudinary configuration to store images
 cloudinary.config({
   cloud_name: cloudName,
-  api_key: apiKey,
-  api_secret: apiSecret,
+  api_key: cloudApiKey,
+  api_secret: cloudApiSecret,
 });
 
 const app = express();
