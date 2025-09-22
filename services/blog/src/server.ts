@@ -1,12 +1,23 @@
 import express from "express";
 import dotenv from "dotenv";
 import blogRoutes from "./routes/blogRoutes.js";
+import { createClient } from "redis";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 const port = process.env.PORT;
+
+// creating redis client
+// It is good to set up redis before the api routes, so that redis is ready before the api are being used and so that it doesnt cause an error
+export const redisClient = createClient({
+  url: process.env.REDIS_URL!, // '!' tells TS that it is definitely not undefined
+});
+redisClient
+  .connect()
+  .then(() => console.log("Connected To Redis"))
+  .catch(console.error);
 
 app.use("/api/v1", blogRoutes);
 
