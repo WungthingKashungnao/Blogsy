@@ -1,6 +1,7 @@
 import type { AuthenticatedRequest } from "../middleware/isAuth.js";
 import getBuffer from "../utils/dataUri.js";
 import { sql } from "../utils/db.js";
+import { invalidateCacheJob } from "../utils/rabbimq.js";
 import TryCatch from "../utils/TryCatch.js";
 import cloudinary from "cloudinary";
 
@@ -32,6 +33,8 @@ export const createBlog = TryCatch(async (req: AuthenticatedRequest, res) => {
     VALUES (${title}, ${description}, ${cloud.secure_url}, ${blogcontent}, ${category}, ${req.user?._id})
     RETURNING *
   `;
+
+  await invalidateCacheJob(["blogs:*"]); //calling rabbitmq function to invalidate redis cache with the similar keys
 
   return res.status(200).json({
     message: "Blog Created Successfully",
