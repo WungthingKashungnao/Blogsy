@@ -92,6 +92,8 @@ export const updateBlog = TryCatch(async (req: AuthenticatedRequest, res) => {
     RETURNING *
   `;
 
+  await invalidateCacheJob(["blogs:*"]); //calling rabbitmq function to invalidate redis cache with the similar keys
+
   return res.status(200).json({
     message: "Blog Updated",
     blog: updateBlog[0],
@@ -110,6 +112,8 @@ export const deleteBlog = TryCatch(async (req: AuthenticatedRequest, res) => {
   await sql`DELETE FROM blogs WHERE id = ${req.params.id}`;
   await sql`DELETE FROM savedblogs WHERE blogid = ${req.params.id}`;
   await sql`DELETE FROM comments WHERE blogid = ${req.params.id}`;
+
+  await invalidateCacheJob(["blogs:*"]); //calling rabbitmq function to invalidate redis cache with the similar keys
 
   return res.status(200).json({
     messsage: "Blog Deleted Successfully",
