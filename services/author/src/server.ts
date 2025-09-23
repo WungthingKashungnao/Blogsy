@@ -1,6 +1,5 @@
 import express from "express";
 import dotenv from "dotenv";
-import { sql } from "./utils/db.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import { v2 as cloudinary } from "cloudinary"; //cloudinary package to store images
 import { connectRabbitMQ } from "./utils/rabbimq.js";
