@@ -4,6 +4,7 @@ import blogRoutes from "./routes/blogRoutes.js";
 import { v2 as cloudinary } from "cloudinary"; //cloudinary package to store images
 import { connectRabbitMQ } from "./utils/rabbimq.js";
 import initDB from "./utils/initDB.js";
+import cors from "cors";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ cloudinary.config({
 const app = express();
 connectRabbitMQ(); //calling function from utils to connect to rabbitmq
 app.use(express.json());
+app.use(cors());
 const port = process.env.PORT;
 
 await initDB(); //calling function to initialize db

@@ -6,6 +6,7 @@ import { v2 as cloudinary } from "cloudinary"; //cloudinary package to store ima
 import cors from "cors";
 
 const app = express();
+app.use(express.json());
 dotenv.config();
 app.use(cors());
 
