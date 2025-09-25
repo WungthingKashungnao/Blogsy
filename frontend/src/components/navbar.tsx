@@ -2,11 +2,13 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
-import { LogIn, Menu, X } from "lucide-react";
+import { CircleUserRound, LogIn, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAppData } from "@/app/context/AppContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false); //state to handle the navbar to open or close
+  const { loading, isAuth } = useAppData();
   return (
     <nav className="bg-white shadow-md p-4 z-50">
       <div className="container mx-auto flex justify-between items-center">
@@ -36,11 +38,21 @@ const Navbar = () => {
             </Link>
           </li>
 
-          <li>
-            <Link href={"/login"} className="hover:text-blue-500">
-              <LogIn />
-            </Link>
-          </li>
+          {loading ? (
+            ""
+          ) : (
+            <li>
+              {isAuth ? (
+                <Link href={"/profile"} className="hover:text-blue-500">
+                  <CircleUserRound />
+                </Link>
+              ) : (
+                <Link href={"/login"} className="hover:text-blue-500">
+                  <LogIn />
+                </Link>
+              )}
+            </li>
+          )}
         </ul>
       </div>
       <div
@@ -62,11 +74,21 @@ const Navbar = () => {
             </Link>
           </li>
 
-          <li>
-            <Link href={"/login"} className="hover:text-blue-500">
-              <LogIn />
-            </Link>
-          </li>
+          {loading ? (
+            ""
+          ) : (
+            <li>
+              {isAuth ? (
+                <Link href={"/profile"} className="hover:text-blue-500">
+                  <CircleUserRound />
+                </Link>
+              ) : (
+                <Link href={"/login"} className="hover:text-blue-500">
+                  <LogIn />
+                </Link>
+              )}
+            </li>
+          )}
         </ul>
       </div>
     </nav>

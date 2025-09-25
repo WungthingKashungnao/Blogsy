@@ -40,6 +40,11 @@ export interface blog {
 
 interface AppContextType {
   user: User | null;
+  loading: boolean;
+  isAuth: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsAuth: React.Dispatch<React.SetStateAction<boolean>>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -75,7 +80,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <AppContext.Provider value={{ user }}>
+    <AppContext.Provider
+      value={{ user, loading, isAuth, setLoading, setIsAuth, setUser }}
+    >
       <GoogleOAuthProvider clientId="1970018920-li0jl38gocnr9ddafjat774ls25iudng.apps.googleusercontent.com">
         {children}
         <Toaster />
