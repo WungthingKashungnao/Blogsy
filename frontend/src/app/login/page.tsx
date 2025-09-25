@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,8 +10,56 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
+import axios from "axios";
+import { user_service } from "../context/AppContext";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const LoginPage = () => {
+  interface GoogleAuthCodeResponse {
+    code: string;
+  }
+  interface LoginResponse {
+    message: string;
+    token: string;
+    user: Record<string, unknown>;
+  }
+  const responseGoogle = async (authResult: GoogleAuthCodeResponse) => {
+    try {
+      const result = await axios.post<LoginResponse>(
+        `${user_service}/api/v1/login`,
+        {
+          code: authResult["code"],
+        }
+      );
+
+      Cookies.set("token", result.data.token, {
+        expires: 5,
+        secure: true,
+        path: "/",
+      });
+      toast.success(result.data.message);
+    } catch (error) {
+      console.log("error: ", error);
+      toast.error("Problem while login");
+    }
+  };
+
+  const onError = (errorResponse: {
+    error?: string;
+    error_description?: string;
+    error_uri?: string;
+  }) => {
+    console.error("Google login error", errorResponse);
+    toast.error("Problem while login");
+  };
+  const googleLogin = useGoogleLogin({
+    onSuccess: responseGoogle,
+    onError: onError,
+    flow: "auth-code",
+  });
+
   return (
     <div className="w-[350px] m-auto mt-[200px]">
       <Card className="w-full max-w-sm">
@@ -21,7 +71,7 @@ const LoginPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button className="w-full">
+          <Button className="w-full" onClick={googleLogin}>
             Login with google{" "}
             <Image
               src={"/google.png"}
