@@ -18,15 +18,15 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
-import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 const ProfilePage = () => {
-  const { user, setUser } = useAppData();
+  const { user, setUser, logOutUser } = useAppData();
+
   const InputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const router = useRouter();
+
   const [formData, setFormData] = useState({
     name: user?.name || "",
     bio: user?.bio || "",
@@ -34,6 +34,8 @@ const ProfilePage = () => {
     facebook: user?.facebook || "",
     linkedin: user?.linkedin || "",
   });
+
+  if (!user) return redirect("/login");
 
   const clickHandler = () => {
     InputRef.current?.click();
@@ -111,6 +113,10 @@ const ProfilePage = () => {
     }
   };
 
+  const logOutHandler = () => {
+    logOutUser();
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen p-4">
       {loading ? (
@@ -179,7 +185,7 @@ const ProfilePage = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2 mt-6 w-full justify-center">
-                <Button>Logout</Button>
+                <Button onClick={logOutHandler}>Logout</Button>
                 <Button>Add Blog</Button>
 
                 <Dialog open={open} onOpenChange={setOpen}>
