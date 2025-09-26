@@ -7,20 +7,43 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loading from "@/components/loading";
+import { Facebook, Instagram, Linkedin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+import { headers } from "next/headers";
 
 const ProfilePage = () => {
   const { user, setUser } = useAppData();
   const InputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    name: user?.name || "",
+    bio: user?.bio || "",
+    instagram: user?.instagram || "",
+    facebook: user?.facebook || "",
+    linkedin: user?.linkedin || "",
+  });
+
   const clickHandler = () => {
     InputRef.current?.click();
   };
 
-  type UserProfileRes = Pick<User, "_id" | "name" | "email" | "image">;
-  interface UpdatePicResponse {
+  //   type UserProfileRes = Pick<User, "_id" | "name" | "email" | "image">;
+  interface UpdateUserResponse {
     message: string;
     token: string;
-    user: UserProfileRes;
+    user: User;
   }
 
   const changeHandler = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +56,7 @@ const ProfilePage = () => {
       try {
         setLoading(true);
         const token = Cookies.get("token");
-        const { data } = await axios.put<UpdatePicResponse>(
+        const { data } = await axios.put<UpdateUserResponse>(
           `${user_service}/api/v1/user/update/pic`,
           formData,
           {
@@ -57,6 +80,37 @@ const ProfilePage = () => {
       }
     }
   };
+
+  const handleFormSubmit = async () => {
+    try {
+      setLoading(true);
+      const token = Cookies.get("token");
+      const { data } = await axios.put<UpdateUserResponse>(
+        `${user_service}/api/v1/user/update`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success(data.message);
+      setLoading(false);
+      Cookies.set("token", data.token, {
+        expires: 5,
+        secure: true,
+        path: "/",
+      });
+      setUser(data.user as User);
+      setOpen(false);
+    } catch (error) {
+      setLoading(false);
+      console.log("error:", error);
+      toast.error("Update user failed");
+    }
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen p-4">
       {loading ? (
@@ -80,6 +134,127 @@ const ProfilePage = () => {
                   onChange={changeHandler}
                 />
               </Avatar>
+              <div className="w-full items-center space-y-2 text-center">
+                <label className="font-medium">Name:</label>
+                <p>{user?.name}</p>
+              </div>
+              <div className="w-full space-y-2 text-center">
+                <label className="font-medium">Email:</label>
+                <p>{user?.email}</p>
+              </div>
+              {user?.bio && (
+                <div className="w-full space-y-2 text-center">
+                  <label className="font-medium">Bio:</label>
+                  <p>{user?.bio}</p>
+                </div>
+              )}
+              <div className="flex gap-4 mt-3">
+                {user?.instagram && (
+                  <a
+                    href={user.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Instagram className="text-pink-500 text-2xl" />
+                  </a>
+                )}
+                {user?.facebook && (
+                  <a
+                    href={user.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Facebook className="text-blue-600 text-2xl" />
+                  </a>
+                )}
+                {user?.linkedin && (
+                  <a
+                    href={user.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Linkedin className="text-blue-700 text-2xl" />
+                  </a>
+                )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 mt-6 w-full justify-center">
+                <Button>Logout</Button>
+                <Button>Add Blog</Button>
+
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant={"outline"}>Edit</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px">
+                    <DialogHeader>
+                      <DialogTitle>Edit Profile</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      <div>
+                        <Label>Name</Label>
+                        <Input
+                          value={formData.name}
+                          onChange={(e) =>
+                            setFormData({ ...formData, name: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label>Instagram</Label>
+                        <Input
+                          value={formData.instagram}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              instagram: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label>Facebook</Label>
+                        <Input
+                          value={formData.facebook}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              facebook: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label>linkedin</Label>
+                        <Input
+                          value={formData.linkedin}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              linkedin: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label>Bio</Label>
+                        <Input
+                          value={formData.bio}
+                          onChange={(e) =>
+                            setFormData({ ...formData, bio: e.target.value })
+                          }
+                        />
+                      </div>
+                      <Button
+                        onClick={handleFormSubmit}
+                        className="w-full mt-4"
+                      >
+                        Update User
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardContent>
           </CardHeader>
         </Card>
